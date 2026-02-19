@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hubbell — WhatsApp Sales Agent Workflow</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F7F9FC;--surface:#FFFFFF;--surface-2:#F0F4FA;--surface-3:#E8EEF6;--border:rgba(30,64,120,0.08);--border-accent:rgba(37,99,235,0.18);--text:#1B2A4A;--text-dim:#4A5E80;--text-muted:#8B9DC3;--accent-blue:#2563EB;--accent-green:#059669;--accent-orange:#D97706;--accent-red:#DC2626;--accent-purple:#7C3AED;--accent-teal:#0D9488;--radius:16px;--radius-sm:10px;--shadow-sm:0 1px 3px rgba(30,64,120,0.06);--shadow-md:0 4px 16px rgba(30,64,120,0.08);--shadow-lg:0 12px 40px rgba(30,64,120,0.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.6;overflow-x:hidden}
+.container{max-width:1200px;margin:0 auto;padding:60px 32px}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:60px;position:relative}
+.header::after{content:'';position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--accent-blue),transparent)}
+.header-logos{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:32px;animation:fadeDown .6s ease}
+.header-logo-dark{background:#1B2A4A;border-radius:12px;padding:12px 24px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md)}
+.header-logo-dark img{height:36px}
+.header-logo-light img{height:44px}
+.header-divider{width:1px;height:40px;background:linear-gradient(180deg,transparent,var(--accent-blue),transparent);opacity:.3}
+.badge{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);padding:8px 20px;border-radius:100px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent-blue);margin-bottom:28px;box-shadow:var(--shadow-sm);animation:fadeDown .6s ease .1s both}
+.badge::before{content:'';width:6px;height:6px;background:var(--accent-blue);border-radius:50%;animation:pulse 2s infinite}
+h1{font-size:clamp(32px,5vw,52px);font-weight:700;letter-spacing:-1.5px;line-height:1.1;background:linear-gradient(135deg,#1B2A4A 0%,#2563EB 60%,#60A5FA 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:fadeDown .6s ease .2s both}
+.subtitle{color:var(--text-dim);font-size:17px;margin-top:16px;max-width:600px;margin-inline:auto;animation:fadeDown .6s ease .3s both}
+
+/* TABS */
+.tabs{display:flex;justify-content:center;gap:4px;margin-bottom:48px;background:var(--surface);border:1px solid var(--border);padding:4px;border-radius:14px;width:fit-content;margin-inline:auto;box-shadow:var(--shadow-sm);animation:fadeDown .6s ease .4s both;flex-wrap:wrap}
+.tab{padding:11px 18px;border:none;background:none;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;border-radius:10px;transition:all .3s ease;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--accent-blue);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+.tab-content{display:none;animation:fadeIn .4s ease}
+.tab-content.active{display:block}
+
+/* FLOW NODES */
+.flow{position:relative;display:flex;flex-direction:column}
+.flow-line{position:absolute;left:50%;top:0;bottom:0;width:2px;background:linear-gradient(180deg,#93C5FD,#2563EB,#60A5FA,#93C5FD);opacity:.18;transform:translateX(-50%);z-index:0}
+.phase{position:relative;z-index:1;margin-bottom:16px}
+.phase-label{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-left:4px}
+.phase-number{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;flex-shrink:0}
+.phase-title{font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase}
+.node{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:12px;position:relative;transition:all .3s ease;overflow:hidden;box-shadow:var(--shadow-sm)}
+.node:hover{border-color:var(--border-accent);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.node::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.node.blue::before{background:linear-gradient(90deg,#2563EB,#93C5FD,transparent)}
+.node.green::before{background:linear-gradient(90deg,#059669,#6EE7B7,transparent)}
+.node.orange::before{background:linear-gradient(90deg,#D97706,#FDE68A,transparent)}
+.node.red::before{background:linear-gradient(90deg,#DC2626,#FCA5A5,transparent)}
+.node.purple::before{background:linear-gradient(90deg,#7C3AED,#C4B5FD,transparent)}
+.node.teal::before{background:linear-gradient(90deg,#0D9488,#99F6E4,transparent)}
+.node-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:14px}
+.node-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.node-icon.blue{background:rgba(37,99,235,.08)}.node-icon.green{background:rgba(5,150,105,.08)}.node-icon.orange{background:rgba(217,119,6,.08)}.node-icon.red{background:rgba(220,38,38,.08)}.node-icon.purple{background:rgba(124,58,237,.08)}.node-icon.teal{background:rgba(13,148,136,.08)}
+.node-title{font-size:17px;font-weight:600;margin-bottom:4px;color:var(--text)}
+.node-role{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.5px}
+.node-body{color:var(--text-dim);font-size:14px;line-height:1.7}
+.node-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.tag{padding:4px 12px;border-radius:100px;font-size:11px;font-weight:500;border:1px solid}
+.tag.blue{color:var(--accent-blue);border-color:rgba(37,99,235,.2);background:rgba(37,99,235,.06)}
+.tag.green{color:var(--accent-green);border-color:rgba(5,150,105,.2);background:rgba(5,150,105,.06)}
+.tag.orange{color:var(--accent-orange);border-color:rgba(217,119,6,.2);background:rgba(217,119,6,.06)}
+.tag.red{color:var(--accent-red);border-color:rgba(220,38,38,.2);background:rgba(220,38,38,.06)}
+.tag.purple{color:var(--accent-purple);border-color:rgba(124,58,237,.2);background:rgba(124,58,237,.06)}
+.tag.teal{color:var(--accent-teal);border-color:rgba(13,148,136,.2);background:rgba(13,148,136,.06)}
+.connector{display:flex;align-items:center;justify-content:center;padding:8px 0;position:relative;z-index:1}
+.connector-arrow{width:32px;height:32px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--accent-blue);font-size:14px;box-shadow:var(--shadow-sm)}
+.decision-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.decision-path{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px}
+.decision-label{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.decision-label.yes{color:var(--accent-green)}.decision-label.no{color:var(--accent-red)}
+.decision-desc{color:var(--text-dim);font-size:13px;line-height:1.6}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px}
+.feature-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:22px;transition:all .3s ease}
+.feature-card:hover{border-color:var(--border-accent);background:var(--surface);box-shadow:var(--shadow-md)}
+.feature-emoji{font-size:24px;margin-bottom:12px}
+.feature-name{font-size:14px;font-weight:600;margin-bottom:6px;color:var(--text)}
+.feature-desc{font-size:12px;color:var(--text-dim);line-height:1.6}
+
+/* FORMAT BOX */
+.format-box{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;margin-top:12px}
+.format-box-title{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--accent-blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.format-box code{background:#E0E7FF;color:#1E40AF;padding:2px 8px;border-radius:6px;font-family:'Space Mono',monospace;font-size:12px;font-weight:600}
+.format-box p{font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:4px}
+
+/* EMAIL & QUOTE FRAMES */
+.email-frame{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;max-width:780px;margin:0 auto;box-shadow:var(--shadow-lg)}
+.email-toolbar{background:var(--surface-2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px}
+.toolbar-dots{display:flex;gap:6px}
+.toolbar-dots span{width:10px;height:10px;border-radius:50%;background:var(--surface-3)}
+.toolbar-dots span:first-child{background:#FC5753}.toolbar-dots span:nth-child(2){background:#FDBC40}.toolbar-dots span:nth-child(3){background:#33C748}
+.toolbar-title{font-size:12px;color:var(--text-muted);font-family:'Space Mono',monospace;margin-left:12px}
+.email-meta{padding:24px 32px;border-bottom:1px solid var(--border)}
+.email-meta-row{display:flex;gap:12px;margin-bottom:8px;font-size:13px}
+.email-meta-label{color:var(--text-muted);font-weight:500;min-width:60px;font-family:'Space Mono',monospace;font-size:11px}
+.email-meta-value{color:var(--text-dim)}
+.email-body-wrap{background:#FAFBFE}
+.email-html{font-family:'DM Sans',-apple-system,sans-serif;color:#1B2A4A}
+.email-banner{background:linear-gradient(135deg,#1E40AF 0%,#2563EB 50%,#3B82F6 100%);padding:36px 32px 28px;text-align:center}
+.email-banner h2{color:#fff;font-size:22px;font-weight:700;margin-bottom:8px}
+.email-banner p{color:rgba(255,255,255,.7);font-size:13px}
+.email-priority{display:inline-block;background:rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;border:1px solid rgba(255,255,255,.3)}
+.email-content{padding:32px}
+.email-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px}
+.email-info-box{background:#EFF6FF;border-radius:10px;padding:16px;border:1px solid rgba(37,99,235,.08)}
+.email-info-box .label{font-size:10px;font-weight:700;color:#6B7FA8;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.email-info-box .value{font-size:15px;font-weight:600;color:#1B2A4A}
+.email-table-wrap{border:1px solid #DBEAFE;border-radius:10px;overflow:hidden;margin-bottom:28px}
+.email-table{width:100%;border-collapse:collapse;font-size:13px}
+.email-table thead{background:#1E40AF;color:#fff}
+.email-table th{padding:12px 16px;text-align:left;font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+.email-table td{padding:12px 16px;border-bottom:1px solid #EFF6FF;color:#374151}
+.email-table tr:nth-child(even) td{background:#F8FAFF}
+.email-table .sku-code{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:#1E40AF}
+.email-urgency{display:inline-block;padding:2px 10px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.email-urgency.high{background:#FEE2E2;color:#DC2626}.email-urgency.medium{background:#FEF3C7;color:#D97706}
+.email-cta-section{text-align:center;padding:24px;background:#EFF6FF;border-radius:10px;margin-bottom:24px;border:1px solid rgba(37,99,235,.08)}
+.email-cta-section p{font-size:13px;color:#4A5E80;margin-bottom:16px}
+.email-cta{display:inline-block;background:linear-gradient(135deg,#2563EB,#3B82F6);color:#fff;padding:14px 36px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px;box-shadow:0 4px 12px rgba(37,99,235,.3)}
+.email-footer{padding:24px 32px;text-align:center;border-top:1px solid #DBEAFE;font-size:11px;color:#8B9DC3}
+.summary-row{background:#EFF6FF;border-radius:10px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;border:1px solid rgba(37,99,235,.08)}
+.summary-stat{text-align:center}
+.summary-stat .num{font-size:24px;font-weight:700;color:#1E40AF}
+.summary-stat .lbl{font-size:10px;color:#6B7FA8;text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.section-title{font-size:14px;font-weight:700;color:#1B2A4A;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:#DBEAFE}
+
+/* QUOTE */
+.quote-header-bar{background:linear-gradient(135deg,#1B2A4A,#1E3A5F);padding:28px 36px;display:flex;align-items:center;justify-content:space-between}
+.quote-header-right{text-align:right}
+.quote-header-right .q-label{font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
+.quote-header-right .q-value{font-size:14px;color:#fff;font-weight:600}
+.quote-client-bar{background:#EFF6FF;padding:20px 36px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #DBEAFE;flex-wrap:wrap;gap:16px}
+.quote-client-name{font-size:16px;font-weight:700;color:#1B2A4A}
+.quote-client-detail{font-size:12px;color:#4A5E80}
+.quote-meta-pills{display:flex;gap:8px;flex-wrap:wrap}
+.quote-pill{background:#fff;border:1px solid #DBEAFE;border-radius:8px;padding:8px 14px;text-align:center}
+.quote-pill .qp-label{font-size:9px;color:#6B7FA8;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.quote-pill .qp-value{font-size:13px;color:#1B2A4A;font-weight:600}
+.quote-body{padding:28px 36px}
+.quote-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px}
+.quote-table thead{background:#F0F4FA}
+.quote-table th{padding:12px 14px;text-align:left;font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#4A5E80;border-bottom:2px solid #DBEAFE}
+.quote-table th:last-child,.quote-table td:last-child{text-align:right}
+.quote-table td{padding:12px 14px;border-bottom:1px solid #F0F4FA;color:#374151}
+.quote-table tr:hover td{background:#F8FAFF}
+.quote-table .sku{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:#1E40AF}
+.quote-table .pending{color:#D97706;font-weight:600;font-style:italic;font-size:12px}
+.quote-totals{display:flex;justify-content:flex-end;margin-bottom:24px}
+.quote-totals-box{background:#F0F4FA;border:1px solid #DBEAFE;border-radius:10px;padding:20px 28px;min-width:280px}
+.qt-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#4A5E80}
+.qt-row.total{border-top:2px solid #DBEAFE;margin-top:8px;padding-top:12px;font-size:16px;font-weight:700;color:#1B2A4A}
+.quote-conditions{background:#FAFCFF;border:1px solid #DBEAFE;border-radius:10px;padding:20px 24px;margin-bottom:24px}
+.quote-conditions h4{font-size:12px;font-weight:700;color:#1B2A4A;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.quote-conditions p{font-size:12px;color:#4A5E80;line-height:1.7;margin-bottom:4px}
+.quote-footer{background:#1B2A4A;padding:20px 36px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.quote-footer-text{font-size:11px;color:rgba(255,255,255,.5)}
+.quote-pending-banner{background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:flex-start;gap:12px}
+.quote-pending-banner .qpb-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.quote-pending-banner .qpb-text{font-size:12px;color:#92400E;line-height:1.6}
+.quote-pending-banner .qpb-text strong{color:#78350F}
+
+/* FLOWCHART */
+.flowchart{display:flex;flex-direction:column;align-items:center;padding:20px 0 40px}
+.fc-node{position:relative;text-align:center;transition:transform .3s ease}
+.fc-node:hover{transform:translateY(-3px)}
+.fc-box{background:var(--surface);border:2px solid #DBEAFE;border-radius:14px;padding:18px 28px;min-width:260px;max-width:380px;box-shadow:var(--shadow-sm);transition:all .3s ease}
+.fc-node:hover .fc-box{border-color:var(--accent-blue);box-shadow:var(--shadow-md)}
+.fc-box.start{background:linear-gradient(135deg,#1E40AF,#2563EB);border-color:#1E40AF;color:#fff;border-radius:50px;padding:16px 36px}
+.fc-box.end{background:linear-gradient(135deg,#059669,#10B981);border-color:#059669;color:#fff;border-radius:50px;padding:16px 36px}
+.fc-box.decision{border:2px solid #F59E0B}
+.fc-box.decision::before{content:'';position:absolute;top:-14px;left:50%;transform:translateX(-50%) rotate(45deg);background:#F59E0B;width:26px;height:26px;border-radius:6px}
+.fc-box.process{border-color:#BFDBFE;background:#FAFCFF}
+.fc-box.action{border-color:#93C5FD;border-style:dashed;background:#F0F7FF}
+.fc-box.alert{border-color:#FCA5A5;background:#FFF5F5}
+.fc-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+.fc-box.start .fc-title,.fc-box.end .fc-title{color:#fff}
+.fc-desc{font-size:12px;color:var(--text-dim);line-height:1.5}
+.fc-box.start .fc-desc,.fc-box.end .fc-desc{color:rgba(255,255,255,.8)}
+.fc-icon{font-size:22px;margin-bottom:6px}
+.fc-arrow{display:flex;flex-direction:column;align-items:center;padding:4px 0}
+.fc-arrow-line{width:2px;height:28px;background:linear-gradient(180deg,#BFDBFE,#60A5FA);border-radius:2px}
+.fc-arrow-head{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #60A5FA}
+.fc-arrow-label{font-size:11px;font-weight:600;padding:2px 12px;border-radius:100px;margin:2px 0}
+.fc-arrow-label.yes{background:#ECFDF5;color:#059669}.fc-arrow-label.no{background:#FEF2F2;color:#DC2626}
+.fc-split{display:flex;gap:32px;align-items:flex-start;justify-content:center;position:relative;width:100%;max-width:800px}
+.fc-branch{display:flex;flex-direction:column;align-items:center;flex:1;max-width:350px}
+.fc-split-line{position:absolute;top:0;left:25%;right:25%;height:2px;background:#BFDBFE}
+.fc-split-line::before,.fc-split-line::after{content:'';position:absolute;top:0;width:2px;height:14px;background:#BFDBFE}
+.fc-split-line::before{left:0}.fc-split-line::after{right:0}
+.fc-merge-line{width:50%;max-width:400px;height:2px;background:#BFDBFE;position:relative}
+.fc-merge-line::before,.fc-merge-line::after{content:'';position:absolute;bottom:0;width:2px;height:14px;background:#BFDBFE}
+.fc-merge-line::before{left:0}.fc-merge-line::after{right:0}
+
+/* PRICING TAB */
+.pricing-section{margin-bottom:48px}
+.pricing-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm);transition:all .3s ease;margin-bottom:20px}
+.pricing-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.pricing-card-header{padding:24px 28px;border-bottom:1px solid var(--border)}
+.pricing-card-header h3{font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px}
+.pricing-card-header p{font-size:13px;color:var(--text-dim)}
+.pricing-card-body{padding:24px 28px}
+.pricing-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--surface-2)}
+.pricing-row:last-child{border-bottom:none}
+.pricing-row .pr-label{font-size:14px;color:var(--text-dim)}
+.pricing-row .pr-value{font-size:14px;font-weight:600;color:var(--text)}
+.pricing-row .pr-note{font-size:11px;color:var(--text-muted);font-weight:400;margin-left:8px}
+.pricing-row.highlight{background:#EFF6FF;margin:0 -28px;padding:16px 28px;border-radius:0}
+.pricing-row.highlight .pr-label{font-weight:700;color:#1E40AF}
+.pricing-row.highlight .pr-value{font-size:18px;color:#1E40AF}
+.pricing-discount{background:linear-gradient(135deg,#059669,#10B981);border-radius:var(--radius);padding:28px 32px;color:#fff;margin-top:20px}
+.pricing-discount h4{font-size:16px;font-weight:700;margin-bottom:4px}
+.pricing-discount p{font-size:13px;opacity:.85;margin-bottom:20px}
+.discount-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.discount-box{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:18px;text-align:center}
+.discount-box .db-plan{font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px}
+.discount-box .db-original{font-size:13px;text-decoration:line-through;opacity:.5;margin-bottom:4px}
+.discount-box .db-price{font-size:24px;font-weight:700}
+.discount-box .db-savings{font-size:12px;opacity:.8;margin-top:6px;background:rgba(255,255,255,.15);display:inline-block;padding:2px 10px;border-radius:100px}
+
+/* PLATFORM SECTION */
+.platform-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px}
+.platform-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:22px;text-align:center;transition:all .3s ease}
+.platform-card:hover{border-color:var(--border-accent);box-shadow:var(--shadow-md)}
+.platform-card .pc-icon{font-size:28px;margin-bottom:10px}
+.platform-card .pc-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
+.platform-card .pc-desc{font-size:12px;color:var(--text-dim);line-height:1.5}
+
+.s3-pre{background:#EFF6FF;border:1px solid #DBEAFE;border-radius:8px;padding:16px;font-family:'Space Mono',monospace;font-size:12px;color:#1E40AF;overflow-x:auto;line-height:1.8;margin-top:8px}
+
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+@media(max-width:640px){
+  .container{padding:32px 16px}
+  .email-info-grid,.decision-row,.discount-grid{grid-template-columns:1fr}
+  .features-grid,.platform-grid{grid-template-columns:1fr}
+  .summary-row{flex-direction:column;gap:16px}
+  .node{padding:20px}
+  .quote-header-bar,.quote-client-bar,.quote-footer{flex-direction:column;gap:12px;text-align:center}
+  .quote-header-right{text-align:center}
+  .quote-body{padding:20px}
+  .quote-totals{justify-content:center}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logos">
+    <div class="header-logo-dark"><img src="https://logos-amplify-data.s3.us-east-2.amazonaws.com/logo_data_bunker_blanco.png" alt="Data Bunker"></div>
+    <div class="header-divider"></div>
+    <div class="header-logo-light"><img src="https://logos-amplify-data.s3.us-east-2.amazonaws.com/hubbell.png" alt="Hubbell"></div>
+  </div>
+  <div class="badge">Hubbell &bull; Propuesta T&eacute;cnica</div>
+  <h1>WhatsApp Sales Agent</h1>
+  <p class="subtitle">Sistema inteligente de cotizaci&oacute;n automatizada v&iacute;a WhatsApp con plataforma de gesti&oacute;n impulsada por IA.</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('flow')">Detalle del Flujo</button>
+  <button class="tab" onclick="switchTab('diagram')">Diagrama Visual</button>
+  <button class="tab" onclick="switchTab('quote')">Preview Cotizaci&oacute;n</button>
+  <button class="tab" onclick="switchTab('email')">Preview Email</button>
+  <button class="tab" onclick="switchTab('platform')">Plataforma</button>
+  <button class="tab" onclick="switchTab('features')">Features Extras</button>
+  <button class="tab" onclick="switchTab('pricing')">Inversi&oacute;n</button>
+</div>
+
+<!-- ======== TAB 1: FLOW DETAIL ======== -->
+<div id="tab-flow" class="tab-content active">
+<div class="flow">
+<div class="flow-line"></div>
+
+<div class="phase">
+  <div class="phase-label"><div class="phase-number" style="background:rgba(37,99,235,.08);color:var(--accent-blue);">01</div><div class="phase-title" style="color:var(--accent-blue);">Captura del Pedido</div></div>
+  <div class="node blue">
+    <div class="node-header"><div class="node-icon blue">&#x1F9D1;&#x200D;&#x1F4BC;</div><div><div class="node-title">Vendedor visita al cliente</div><div class="node-role">Actor &rarr; Vendedor de campo</div></div></div>
+    <div class="node-body">El vendedor acude presencialmente con el cliente, levanta el pedido anotando <strong>SKUs/Materiales</strong> y <strong>cantidades</strong> requeridas. Env&iacute;a la informaci&oacute;n al agente de WhatsApp usando alguno de los siguientes formatos:</div>
+    <div class="node-tags">
+      <span class="tag blue">&#x1F4F8; Foto de documento</span>
+      <span class="tag blue">&#x1F4CA; Excel</span>
+      <span class="tag blue">&#x1F4DD; Texto WhatsApp</span>
+      <span class="tag blue">&#x1F4CB; PDF</span>
+    </div>
+    <div class="format-box">
+      <div class="format-box-title">Formatos aceptados</div>
+      <p><strong>&#x1F4DD; Texto WhatsApp / &#x1F4CA; Excel:</strong> Debe seguir la estructura <code>SKU/MATERIAL - CANTIDAD</code></p>
+      <p style="color:#8B9DC3;font-size:12px;margin-bottom:8px;">Ejemplo: <code>HBL-2210-MX - 500</code></p>
+      <p><strong>&#x1F4F8; Foto:</strong> Foto de un <strong>documento impreso</strong> del cliente que contenga SKU/Material y cantidad.</p>
+      <p><strong>&#x1F4CB; PDF:</strong> Archivo digital que contenga SKU/Material y cantidad en su contenido.</p>
+      <p style="margin-top:8px;font-size:12px;color:var(--accent-red);"><strong>Requisito obligatorio:</strong> Todos los formatos deben incluir SKU/Material y Cantidad para ser procesados.</p>
+    </div>
+  </div>
+</div>
+
+<div class="connector"><div class="connector-arrow">&darr;</div></div>
+
+<div class="phase">
+  <div class="phase-label"><div class="phase-number" style="background:rgba(5,150,105,.08);color:var(--accent-green);">02</div><div class="phase-title" style="color:var(--accent-green);">Recepci&oacute;n &amp; Parsing Inteligente</div></div>
+  <div class="node green">
+    <div class="node-header"><div class="node-icon green">&#x1F916;</div><div><div class="node-title">Agente WhatsApp recibe el pedido</div><div class="node-role">Actor &rarr; Chatbot IA (WhatsApp Business API)</div></div></div>
+    <div class="node-body">El agente recibe el mensaje y <strong>extrae autom&aacute;ticamente</strong> la informaci&oacute;n estructurada: SKU + cantidad. Usa OCR para fotos de documentos impresos, parsing de Excel/CSV, o NLP para texto libre. Confirma con el vendedor los datos interpretados.</div>
+    <div class="node-tags"><span class="tag green">OCR Vision</span><span class="tag green">Excel Parser</span><span class="tag green">NLP Extraction</span></div>
+  </div>
+  <div class="node green" style="margin-top:12px;">
+    <div class="node-header"><div class="node-icon green">&#x2705;</div><div><div class="node-title">Validaci&oacute;n de datos m&iacute;nimos</div><div class="node-role">Proceso &rarr; Validaci&oacute;n autom&aacute;tica</div></div></div>
+    <div class="node-body">Verifica que cada l&iacute;nea tenga <strong>SKU v&aacute;lido</strong> y <strong>cantidad num&eacute;rica</strong>. Si falta info, solicita completarla. Tambi&eacute;n pregunta: <strong>nombre del cliente, fecha de entrega</strong> y <strong>moneda</strong>.</div>
+  </div>
+</div>
+
+<div class="connector"><div class="connector-arrow">&darr;</div></div>
+
+<div class="phase">
+  <div class="phase-label"><div class="phase-number" style="background:rgba(217,119,6,.08);color:var(--accent-orange);">03</div><div class="phase-title" style="color:var(--accent-orange);">Consulta Base de Datos de Precios</div></div>
+  <div class="node orange">
+    <div class="node-header"><div class="node-icon orange">&#x1F5C4;&#xFE0F;</div><div><div class="node-title">B&uacute;squeda de precios en AWS S3</div><div class="node-role">Sistema &rarr; AWS S3 + Lambda / Athena</div></div></div>
+    <div class="node-body">Por cada SKU, busca en <strong>AWS S3</strong> el precio unitario vigente. Cruza SKU con lista de precios del cliente. Resultado: <strong>precio &times; cantidad = subtotal por l&iacute;nea</strong>.</div>
+    <div class="node-tags"><span class="tag orange">AWS S3</span><span class="tag orange">Lambda</span><span class="tag orange">Price DB</span></div>
+  </div>
+  <div class="node orange" style="margin-top:12px;border-left:3px solid var(--accent-orange);">
+    <div class="node-header"><div class="node-icon orange">&#x26A1;</div><div><div class="node-title">&iquest;Se encontraron todos los precios?</div><div class="node-role">Decisi&oacute;n &rarr; Split del flujo</div></div></div>
+    <div class="decision-row">
+      <div class="decision-path">
+        <div class="decision-label yes">&#x2713; S&Iacute; &mdash; SKUs encontrados</div>
+        <div class="decision-desc">Se genera la <strong>cotizaci&oacute;n completa</strong> en formato del cliente y se env&iacute;a por WhatsApp.</div>
+      </div>
+      <div class="decision-path">
+        <div class="decision-label no">&#x2717; NO &mdash; SKUs sin precio</div>
+        <div class="decision-desc">Se genera <strong>cotizaci&oacute;n parcial</strong> y se detona <strong>correo autom&aacute;tico</strong> al equipo de precios.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="connector"><div class="connector-arrow">&darr;</div></div>
+
+<div class="phase">
+  <div class="phase-label"><div class="phase-number" style="background:rgba(220,38,38,.08);color:var(--accent-red);">04</div><div class="phase-title" style="color:var(--accent-red);">Escalamiento a Equipo de Precios</div></div>
+  <div class="node red">
+    <div class="node-header"><div class="node-icon red">&#x1F4E7;</div><div><div class="node-title">Correo autom&aacute;tico al equipo de precios</div><div class="node-role">Sistema &rarr; Email autom&aacute;tico (SES / SendGrid)</div></div></div>
+    <div class="node-body">Email con SKUs sin precio, descripci&oacute;n, cantidad, cliente y urgencia. El equipo contacta a la <strong>planta de origen</strong> (global) para solicitar cotizaci&oacute;n.</div>
+    <div class="node-tags"><span class="tag red">Email Auto</span><span class="tag red">Planta Global</span><span class="tag red">SLA Tracking</span></div>
+  </div>
+  <div class="node green" style="margin-top:12px;">
+    <div class="node-header"><div class="node-icon green">&#x1F4AC;</div><div><div class="node-title">Agente WhatsApp notifica al vendedor</div><div class="node-role">Sistema &rarr; Mensaje autom&aacute;tico al vendedor</div></div></div>
+    <div class="node-body">El agente env&iacute;a al vendedor un mensaje por WhatsApp indicando:<br><br>
+      &#x2705; <strong>La cotizaci&oacute;n parcial</strong> con los SKUs que s&iacute; tienen precio.<br>
+      &#x26A0;&#xFE0F; <strong>La lista de SKUs sin precio disponible</strong> que se est&aacute;n mandando a cotizar.<br>
+      &#x1F4C5; Le pregunta la <strong>fecha ideal de entrega</strong> para incluirla en el requerimiento al equipo de precios.<br>
+      &#x1F465; Le pregunta si tiene un <strong>contacto espec&iacute;fico</strong> en el cliente al que dirigir la cotizaci&oacute;n final.<br>
+      &#x1F4DD; Le pregunta si hay alguna <strong>condici&oacute;n especial</strong> que deba considerar el equipo de precios (volumen, proyecto, urgencia, etc.).</div>
+    <div class="format-box" style="margin-top:16px;">
+      <div class="format-box-title">Ejemplo de mensaje al vendedor</div>
+      <p style="font-size:12px;color:var(--text);line-height:1.8;background:#fff;padding:14px;border-radius:8px;border:1px solid #DBEAFE;">
+        &#x1F44B; <strong>Hola Carlos,</strong> tu cotizaci&oacute;n para CEMEX est&aacute; parcialmente lista.<br><br>
+        &#x2705; <strong>8 de 10 SKUs cotizados</strong> &mdash; te env&iacute;o el documento adjunto.<br><br>
+        &#x26A0;&#xFE0F; <strong>2 SKUs sin precio disponible:</strong><br>
+        &bull; <code>HBL-4820-TX</code> &mdash; Conector r&iacute;gido 2&quot; EMT<br>
+        &bull; <code>HBL-9918-UK</code> &mdash; Clavija twist-lock 20A<br><br>
+        Ya se envi&oacute; la solicitud al equipo de precios. Para agilizar, necesito que me confirmes:<br>
+        1&#xFE0F;&#x20E3; &iquest;Cu&aacute;l es la <strong>fecha ideal de entrega</strong>?<br>
+        2&#xFE0F;&#x20E3; &iquest;Hay alg&uacute;n <strong>contacto espec&iacute;fico</strong> del cliente para la cotizaci&oacute;n?<br>
+        3&#xFE0F;&#x20E3; &iquest;Alguna <strong>condici&oacute;n especial</strong>? (volumen, proyecto, urgencia)
+      </p>
+    </div>
+  </div>
+  <div class="node red" style="margin-top:12px;">
+    <div class="node-header"><div class="node-icon red">&#x23F3;</div><div><div class="node-title">Equipo de precios env&iacute;a cotizaci&oacute;n al vendedor</div><div class="node-role">Actor &rarr; Pricing Team &rarr; Vendedor</div></div></div>
+    <div class="node-body">Una vez que el equipo de precios obtiene la cotizaci&oacute;n de la planta, <strong>la persona del equipo de precios es quien env&iacute;a directamente al vendedor</strong> los precios faltantes, ya sea por <strong>correo electr&oacute;nico</strong> o por <strong>WhatsApp</strong>, para completar la cotizaci&oacute;n.</div>
+  </div>
+</div>
+
+<div class="connector"><div class="connector-arrow">&darr;</div></div>
+
+<div class="phase">
+  <div class="phase-label"><div class="phase-number" style="background:rgba(124,58,237,.08);color:var(--accent-purple);">05</div><div class="phase-title" style="color:var(--accent-purple);">Entrega de Cotizaci&oacute;n</div></div>
+  <div class="node purple">
+    <div class="node-header"><div class="node-icon purple">&#x1F4C4;</div><div><div class="node-title">Cotizaci&oacute;n completa al vendedor</div><div class="node-role">Output &rarr; WhatsApp al vendedor</div></div></div>
+    <div class="node-body">Vendedor recibe la <strong>cotizaci&oacute;n en formato del cliente</strong> con SKUs, precios, cantidades, subtotales, total, vigencia y condiciones. Lista para presentar al cliente.</div>
+    <div class="node-tags"><span class="tag purple">&#x1F4CA; Excel</span><span class="tag purple">&#x1F4C4; PDF</span><span class="tag purple">Formato Cliente</span></div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ======== TAB 2: VISUAL DIAGRAM ======== -->
+<div id="tab-diagram" class="tab-content">
+<p style="text-align:center;color:var(--text-dim);font-size:14px;margin-bottom:36px;">Flujo completo del proceso &mdash; desde la visita del vendedor hasta la entrega de la cotizaci&oacute;n.</p>
+<div class="flowchart">
+  <div class="fc-node"><div class="fc-box start"><div class="fc-icon">&#x1F9D1;&#x200D;&#x1F4BC;</div><div class="fc-title">Vendedor visita al cliente</div><div class="fc-desc">Levanta el pedido con SKUs y cantidades</div></div></div>
+  <div class="fc-arrow"><div class="fc-arrow-line"></div><div class="fc-arrow-head"></div></div>
+  <div class="fc-node"><div class="fc-box process"><div class="fc-icon">&#x1F4F2;</div><div class="fc-title">Env&iacute;a pedido por WhatsApp</div><div class="fc-desc">Foto de documento, Excel, texto o PDF<br><strong>Formato: SKU/MATERIAL - CANTIDAD</strong></div></div></div>
+  <div class="fc-arrow"><div class="fc-arrow-line"></div><div class="fc-arrow-head"></div></div>
+  <div class="fc-node"><div class="fc-box process" style="border-color:#34D399;"><div class="fc-icon">&#x1F916;</div><div class="fc-title">Agente IA recibe y procesa</div><div class="fc-desc">Extrae SKUs y cantidades.<br>Confirma datos con el vendedor.</div></div></div>
+  <div class="fc-arrow"><div class="fc-arrow-line"></div><div class="fc-arrow-head"></div></div>
+  <div class="fc-node"><div class="fc-box process" style="border-color:#93C5FD;"><div class="fc-icon">&#x1F50D;</div><div class="fc-title">Busca precios en base de datos</div><div class="fc-desc">Consulta precio de cada SKU en AWS S3</div></div></div>
+  <div class="fc-arrow"><div class="fc-arrow-line"></div><div class="fc-arrow-head"></div></div>
+  <div class="fc-node"><div class="fc-box decision"><div class="fc-icon" style="margin-top:4px;">&#x2753;</div><div class="fc-title" style="color:#92400E;">&iquest;Se encontraron todos los precios?</div></div></div>
+  <div class="fc-split">
+    <div class="fc-split-line"></div>
+    <div class="fc-branch">
+      <div class="fc-arrow"><div class="fc-arrow-label yes">&#x2713; S&iacute;</div><div class="fc-arrow-line"></div><div class="fc-arrow-head"></div></div>
+      <div class="fc-node"><div class="fc-box process" style="border-color:#6EE7B7;"><div class="fc-icon">&#x1F4CA;</div><div class="fc-title">Genera cotizaci&oacute;n completa</div><div class="fc-desc">SKU &times; precio &times; cantidad<br>En formato del cliente</div></div></div>
+    </div>
+    <div class="fc-branch">
+      <div class="fc-arrow"><div class="fc-arrow-label no">&#x2717; No</div><div class="fc-arrow-line"></div><div class="fc-arrow-head"></div></div>
+      <div class="fc-node"><div class="fc-box alert"><div class="fc-icon">&#x1F4E7;</div><div class="fc-title">Correo al Equipo de Precios</div><div class="fc-desc">Solicita cotizaci&oacute;n de SKUs faltantes a planta de origen</div></div></div>
+      <div class="fc-arrow"><div class="fc-arrow-line"></div><div class="fc-arrow-head"></div></div>
+      <div class="fc-node"><div class="fc-box process" style="border-color:#34D399;"><div class="fc-icon">&#x1F4AC;</div><div class="fc-title">Agente notifica al vendedor</div><div class="fc-desc">Env&iacute;a cotizaci&oacute;n parcial + lista de SKUs sin precio + pregunta fecha de entrega y condiciones</div></div></div>
+      <div class="fc-arrow"><div class="fc-arrow-line"></div><div class="fc-arrow-head"></div></div>
+      <div class="fc-node"><div class="fc-box action"><div class="fc-icon">&#x1F30D;</div><div class="fc-title">Planta origen env&iacute;a precios</div><div class="fc-desc">Planta global cotiza y el equipo de precios recibe los precios</div></div></div>
+      <div class="fc-arrow"><div class="fc-arrow-line"></div><div class="fc-arrow-head"></div></div>
+      <div class="fc-node"><div class="fc-box process" style="border-color:#FCA5A5;"><div class="fc-icon">&#x1F464;</div><div class="fc-title">Pricing env&iacute;a al vendedor</div><div class="fc-desc"><strong>La persona del equipo de precios</strong> env&iacute;a directamente al vendedor por correo o WhatsApp</div></div></div>
+    </div>
+  </div>
+  <div class="fc-merge-line"></div>
+  <div class="fc-arrow"><div class="fc-arrow-line"></div><div class="fc-arrow-head"></div></div>
+  <div class="fc-node"><div class="fc-box process" style="border-color:#A78BFA;"><div class="fc-icon">&#x1F4AC;</div><div class="fc-title">Vendedor recibe cotizaci&oacute;n completa</div><div class="fc-desc">Documento listo para presentar al cliente</div></div></div>
+  <div class="fc-arrow"><div class="fc-arrow-line"></div><div class="fc-arrow-head"></div></div>
+  <div class="fc-node"><div class="fc-box end"><div class="fc-icon">&#x2705;</div><div class="fc-title">Entrega cotizaci&oacute;n al cliente</div><div class="fc-desc">Listo para cerrar la venta</div></div></div>
+  <div style="margin-top:48px;display:flex;flex-wrap:wrap;gap:16px;justify-content:center;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);"><div style="width:28px;height:16px;border-radius:50px;background:linear-gradient(135deg,#1E40AF,#2563EB);"></div>Inicio / Fin</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);"><div style="width:28px;height:16px;border-radius:6px;border:2px solid #BFDBFE;background:#FAFCFF;"></div>Proceso</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);"><div style="width:28px;height:16px;border-radius:6px;border:2px solid #F59E0B;"></div>Decisi&oacute;n</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);"><div style="width:28px;height:16px;border-radius:6px;border:2px dashed #93C5FD;background:#F0F7FF;"></div>Acci&oacute;n externa</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim);"><div style="width:28px;height:16px;border-radius:6px;border:2px solid #FCA5A5;background:#FFF5F5;"></div>Escalamiento</div>
+  </div>
+</div>
+</div>
+
+<!-- ======== TAB 3: QUOTE PREVIEW ======== -->
+<div id="tab-quote" class="tab-content">
+<p style="text-align:center;color:var(--text-dim);font-size:14px;margin-bottom:32px;">Preview de la cotizaci&oacute;n que recibir&iacute;a el vendedor para presentar al cliente.</p>
+<div class="email-frame">
+  <div class="email-toolbar"><div class="toolbar-dots"><span></span><span></span><span></span></div><div class="toolbar-title">cotizacion_CEMEX_2026-02-12.pdf</div></div>
+  <div class="quote-header-bar">
+    <img src="https://logos-amplify-data.s3.us-east-2.amazonaws.com/hubbell.png" alt="Hubbell" style="height:36px;">
+    <div class="quote-header-right"><div class="q-label">Cotizaci&oacute;n</div><div class="q-value" style="font-size:20px;color:#93C5FD;">COT-2026-0212-001</div><div class="q-value" style="font-size:12px;color:rgba(255,255,255,.5);margin-top:4px;">12 de febrero de 2026</div></div>
+  </div>
+  <div class="quote-client-bar">
+    <div><div class="quote-client-name">CEMEX Industrial S.A. de C.V.</div><div class="quote-client-detail">Av. Constituci&oacute;n #444 Pte, Monterrey, N.L. &bull; RFC: CIN-850101-XX1</div></div>
+    <div class="quote-meta-pills">
+      <div class="quote-pill"><div class="qp-label">Vendedor</div><div class="qp-value">Carlos Mendoza</div></div>
+      <div class="quote-pill"><div class="qp-label">Zona</div><div class="qp-value">Norte</div></div>
+      <div class="quote-pill"><div class="qp-label">Moneda</div><div class="qp-value">USD</div></div>
+      <div class="quote-pill"><div class="qp-label">Entrega</div><div class="qp-value">28 Feb 2026</div></div>
+    </div>
+  </div>
+  <div class="quote-body">
+    <div class="quote-pending-banner"><div class="qpb-icon">&#x26A0;&#xFE0F;</div><div class="qpb-text"><strong>Cotizaci&oacute;n parcial:</strong> 2 de 10 SKUs pendientes de precio. El equipo de precios le enviar&aacute; directamente los precios faltantes por correo o WhatsApp.</div></div>
+    <div class="section-title">Detalle de Productos</div>
+    <div class="email-table-wrap">
+      <table class="quote-table"><thead><tr><th>#</th><th>SKU</th><th>Descripci&oacute;n</th><th>Cant.</th><th>P. Unitario</th><th>Subtotal</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><span class="sku">HBL-2210-MX</span></td><td>Conector r&iacute;gido 1/2" EMT zinc</td><td>500</td><td>$1.85</td><td>$925.00</td></tr>
+        <tr><td>2</td><td><span class="sku">HBL-3350-MX</span></td><td>Caja condulet tipo LB 3/4"</td><td>200</td><td>$12.40</td><td>$2,480.00</td></tr>
+        <tr><td>3</td><td><span class="sku">HBL-5520-US</span></td><td>Recept&aacute;culo duplex 20A 125V</td><td>150</td><td>$8.75</td><td>$1,312.50</td></tr>
+        <tr><td>4</td><td><span class="sku">HBL-7100-MX</span></td><td>Clavija industrial 30A twist-lock</td><td>80</td><td>$24.50</td><td>$1,960.00</td></tr>
+        <tr><td>5</td><td><span class="sku">HBL-1180-US</span></td><td>Bandeja portacables 300mm galv.</td><td>120</td><td>$18.90</td><td>$2,268.00</td></tr>
+        <tr><td>6</td><td><span class="sku">HBL-4400-MX</span></td><td>Prensacable M20 IP68 nylon</td><td>300</td><td>$3.20</td><td>$960.00</td></tr>
+        <tr><td>7</td><td><span class="sku">HBL-6605-US</span></td><td>Placa de pared 2 gang acero inox.</td><td>100</td><td>$6.50</td><td>$650.00</td></tr>
+        <tr><td>8</td><td><span class="sku">HBL-8801-MX</span></td><td>Interruptor sencillo 15A 120V</td><td>250</td><td>$4.10</td><td>$1,025.00</td></tr>
+        <tr style="background:#FFF7ED;"><td>9</td><td><span class="sku" style="color:#D97706;">HBL-4820-TX</span></td><td>Conector r&iacute;gido 2" EMT (importaci&oacute;n)</td><td>250</td><td><span class="pending">&#x23F3; Pendiente</span></td><td><span class="pending">&mdash;</span></td></tr>
+        <tr style="background:#FFF7ED;"><td>10</td><td><span class="sku" style="color:#D97706;">HBL-9918-UK</span></td><td>Clavija twist-lock 20A (import. UK)</td><td>45</td><td><span class="pending">&#x23F3; Pendiente</span></td><td><span class="pending">&mdash;</span></td></tr>
+      </tbody></table>
+    </div>
+    <div class="quote-totals"><div class="quote-totals-box">
+      <div class="qt-row"><span>Subtotal (8 de 10 SKUs)</span><span>$11,580.50 USD</span></div>
+      <div class="qt-row"><span>SKUs pendientes</span><span style="color:#D97706;">2 productos</span></div>
+      <div class="qt-row"><span>IVA (16%)</span><span>$1,852.88 USD</span></div>
+      <div class="qt-row total"><span>Total parcial</span><span>$13,433.38 USD</span></div>
+    </div></div>
+    <div class="quote-conditions"><h4>Condiciones Comerciales</h4>
+      <p><strong>Vigencia:</strong> 30 d&iacute;as naturales desde la emisi&oacute;n.</p>
+      <p><strong>Entrega:</strong> 5-10 d&iacute;as h&aacute;biles (nacionales). Importaci&oacute;n sujeta a confirmaci&oacute;n.</p>
+      <p><strong>Pago:</strong> Cr&eacute;dito 30 d&iacute;as seg&uacute;n contrato marco.</p>
+      <p><strong>Flete:</strong> Incluido en &gt;$5,000 USD.</p>
+      <p><strong>Moneda:</strong> USD. TC al d&iacute;a de factura si se paga en MXN.</p>
+    </div>
+  </div>
+  <div class="quote-footer">
+    <img src="https://logos-amplify-data.s3.us-east-2.amazonaws.com/hubbell.png" alt="Hubbell" style="height:20px;opacity:.6;">
+    <div class="quote-footer-text">COT-2026-0212-001 &bull; Powered by <img src="https://logos-amplify-data.s3.us-east-2.amazonaws.com/logo_data_bunker_blanco.png" alt="Data Bunker" style="height:14px;vertical-align:middle;margin-left:4px;opacity:.6;"></div>
+  </div>
+</div>
+</div>
+
+<!-- ======== TAB 4: EMAIL PREVIEW ======== -->
+<div id="tab-email" class="tab-content">
+<p style="text-align:center;color:var(--text-dim);font-size:14px;margin-bottom:32px;">Preview del email al equipo de precios cuando hay SKUs sin cotizaci&oacute;n.</p>
+<div class="email-frame">
+  <div class="email-toolbar"><div class="toolbar-dots"><span></span><span></span><span></span></div><div class="toolbar-title"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ec84998e8e898080c19c9e858f85828bc19e899d99899f98ac84998e8e898080c28f8381">[email&#160;protected]</a></div></div>
+  <div class="email-meta">
+    <div class="email-meta-row"><span class="email-meta-label">De:</span><span class="email-meta-value">Hubbell Sales Agent &lt;<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6d1e0c01081e400f02192d05180f0f080101430e0200">[email&#160;protected]</a>&gt;</span></div>
+    <div class="email-meta-row"><span class="email-meta-label">Para:</span><span class="email-meta-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7303011a101a1d145e0716121e331b061111161f1f5d101c1e">[email&#160;protected]</a></span></div>
+    <div class="email-meta-row"><span class="email-meta-label">Asunto:</span><span class="email-meta-value" style="color:var(--text);font-weight:600;">&#x1F535; Solicitud de Cotizaci&oacute;n &mdash; 12 SKUs | CEMEX Industrial | Carlos Mendoza</span></div>
+  </div>
+  <div class="email-body-wrap"><div class="email-html">
+    <div class="email-banner">
+      <img src="https://logos-amplify-data.s3.us-east-2.amazonaws.com/hubbell.png" alt="Hubbell" style="height:30px;margin-bottom:16px;opacity:.9;">
+      <div class="email-priority">&#x26A1; Cotizaci&oacute;n Requerida</div>
+      <h2>Solicitud de Precios</h2>
+      <p>Generada autom&aacute;ticamente por el Agente de Ventas WhatsApp</p>
+    </div>
+    <div class="email-content">
+      <div class="summary-row">
+        <div class="summary-stat"><div class="num">12</div><div class="lbl">SKUs pendientes</div></div>
+        <div class="summary-stat"><div class="num">847</div><div class="lbl">Unidades total</div></div>
+        <div class="summary-stat"><div class="num" style="color:#DC2626;">48h</div><div class="lbl">SLA objetivo</div></div>
+      </div>
+      <div class="section-title">Informaci&oacute;n del Pedido</div>
+      <div class="email-info-grid">
+        <div class="email-info-box"><div class="label">Cliente</div><div class="value">CEMEX Industrial S.A. de C.V.</div></div>
+        <div class="email-info-box"><div class="label">Vendedor</div><div class="value">Carlos Mendoza &mdash; Zona Norte</div></div>
+        <div class="email-info-box"><div class="label">Solicitud</div><div class="value">12 Feb 2026, 14:32 CST</div></div>
+        <div class="email-info-box"><div class="label">Entrega requerida</div><div class="value">28 Feb 2026</div></div>
+      </div>
+      <div class="section-title" style="margin-top:28px;">SKUs que Requieren Cotizaci&oacute;n</div>
+      <div class="email-table-wrap"><table class="email-table"><thead><tr><th>#</th><th>SKU</th><th>Descripci&oacute;n</th><th>Cant.</th><th>Planta</th><th>Urgencia</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><span class="sku-code">HBL-4820-TX</span></td><td>Conector r&iacute;gido 2" EMT</td><td>250</td><td>Shelton, CT</td><td><span class="email-urgency high">Alta</span></td></tr>
+        <tr><td>2</td><td><span class="sku-code">HBL-7733-MX</span></td><td>Caja condulet tipo FS</td><td>120</td><td>Quer&eacute;taro</td><td><span class="email-urgency high">Alta</span></td></tr>
+        <tr><td>3</td><td><span class="sku-code">HBL-1205-BR</span></td><td>Recept&aacute;culo industrial 30A</td><td>80</td><td>S&atilde;o Paulo</td><td><span class="email-urgency medium">Media</span></td></tr>
+        <tr><td>4</td><td><span class="sku-code">HBL-9918-UK</span></td><td>Clavija twist-lock 20A</td><td>45</td><td>Leeds, UK</td><td><span class="email-urgency medium">Media</span></td></tr>
+        <tr><td>5</td><td><span class="sku-code">HBL-3341-CN</span></td><td>Bandeja portacables 300mm</td><td>200</td><td>Shenzhen</td><td><span class="email-urgency high">Alta</span></td></tr>
+        <tr><td>6</td><td><span class="sku-code">HBL-5502-DE</span></td><td>Prensacable M25 IP68</td><td>152</td><td>Stuttgart</td><td><span class="email-urgency medium">Media</span></td></tr>
+      </tbody></table></div>
+      <p style="font-size:12px;color:#8B9DC3;text-align:center;margin-bottom:24px;">Mostrando 6 de 12 SKUs.</p>
+      <div class="email-cta-section"><p>Descarga la lista completa. Responde a este correo o sube precios al portal.</p><a href="#" class="email-cta">&#x1F4E5; Descargar Lista (Excel)</a></div>
+      <div style="background:#EFF6FF;border-radius:10px;padding:16px 20px;margin-bottom:24px;border-left:3px solid #2563EB;">
+        <div style="font-size:13px;font-weight:700;color:#1E40AF;margin-bottom:4px;">&#x23F0; SLA</div>
+        <div style="font-size:12px;color:#1E40AF;line-height:1.6;">Entrega: <strong>28 feb 2026</strong>. Recordatorio autom&aacute;tico a 24h y 48h.</div>
+      </div>
+      <div style="background:#FEF2F2;border-radius:10px;padding:16px 20px;margin-bottom:24px;border-left:3px solid #DC2626;">
+        <div style="font-size:13px;font-weight:700;color:#991B1B;margin-bottom:4px;">&#x1F464; Acci&oacute;n requerida</div>
+        <div style="font-size:12px;color:#991B1B;line-height:1.6;">Una vez obtenidos los precios de planta, <strong>env&iacute;e la cotizaci&oacute;n directamente al vendedor</strong> por correo o WhatsApp.</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <img src="https://logos-amplify-data.s3.us-east-2.amazonaws.com/hubbell.png" alt="Hubbell" style="height:18px;opacity:.4;margin-bottom:8px;"><br>
+      REQ-2026-0212-0847 &bull; Powered by <img src="https://logos-amplify-data.s3.us-east-2.amazonaws.com/logo_data_bunker_blanco.png" alt="DB" style="height:12px;vertical-align:middle;margin-left:4px;background:#1B2A4A;padding:2px 6px;border-radius:4px;">
+    </div>
+  </div></div>
+</div>
+</div>
+
+<!-- ======== TAB 5: PLATFORM ======== -->
+<div id="tab-platform" class="tab-content">
+<p style="text-align:center;color:var(--text-dim);font-size:14px;margin-bottom:32px;">Plataforma web de gesti&oacute;n con agente de IA integrado para administraci&oacute;n, m&eacute;tricas y carga de datos.</p>
+
+<div class="node blue" style="margin-bottom:24px;">
+  <div class="node-header"><div class="node-icon blue">&#x1F4BB;</div><div><div class="node-title">Plataforma Gestora con IA</div><div class="node-role">Portal web &rarr; Administraci&oacute;n, M&eacute;tricas &amp; Agente IA</div></div></div>
+  <div class="node-body">Desarrollo de una plataforma web donde el usuario administrador podr&aacute; gestionar todo el ecosistema del agente WhatsApp, consultar m&eacute;tricas en tiempo real y utilizar un agente de IA integrado para consultas avanzadas.</div>
+</div>
+
+<div class="section-title">M&eacute;tricas &amp; Analytics</div>
+<div class="platform-grid" style="margin-bottom:32px;">
+  <div class="platform-card"><div class="pc-icon">&#x1F4CA;</div><div class="pc-title">Cotizaciones por Vendedor</div><div class="pc-desc">Cu&aacute;ntas cotizaciones ha solicitado cada vendedor (por n&uacute;mero de tel&eacute;fono), frecuencia y volumen.</div></div>
+  <div class="platform-card"><div class="pc-icon">&#x1F4F1;</div><div class="pc-title">Uso del Agente WhatsApp</div><div class="pc-desc">Mensajes enviados, funciones m&aacute;s usadas (precios, fichas, promos), horarios pico de uso.</div></div>
+  <div class="platform-card"><div class="pc-icon">&#x1F4B0;</div><div class="pc-title">Volumen Cotizado</div><div class="pc-desc">Monto total cotizado por per&iacute;odo, por vendedor, por cliente y por l&iacute;nea de producto.</div></div>
+  <div class="platform-card"><div class="pc-icon">&#x1F50D;</div><div class="pc-title">SKUs M&aacute;s Solicitados</div><div class="pc-desc">Top productos cotizados, productos sin precio recurrentes, tendencias de demanda.</div></div>
+  <div class="platform-card"><div class="pc-icon">&#x1F4C8;</div><div class="pc-title">Conversi&oacute;n de Cotizaciones</div><div class="pc-desc">Tasa de cotizaciones que se convierten en pedidos, seguimiento de pipeline comercial.</div></div>
+</div>
+
+<div class="section-title">Agente de IA en Plataforma</div>
+<div class="node teal" style="margin-bottom:24px;">
+  <div class="node-header"><div class="node-icon teal">&#x1F916;</div><div><div class="node-title">Agente de IA Integrado</div><div class="node-role">Chat IA &rarr; Consulta directa a bases de datos en S3</div></div></div>
+  <div class="node-body" style="margin-bottom:12px;">Dentro de la plataforma web existir&aacute; un agente de IA al que se le podr&aacute; consultar cualquier informaci&oacute;n conectada a las bases de datos en S3: inventario, fichas t&eacute;cnicas, precios, promociones, hist&oacute;rico de cotizaciones, certificaciones y m&aacute;s. Ideal para el equipo de operaciones y direcci&oacute;n comercial.</div>
+  <div class="node-tags">
+    <span class="tag teal">Precios</span><span class="tag teal">Inventario</span><span class="tag teal">Fichas T&eacute;cnicas</span><span class="tag teal">Promociones</span><span class="tag teal">Certificaciones</span><span class="tag teal">Hist&oacute;rico</span>
+  </div>
+</div>
+
+<div class="section-title">Carga de Datos</div>
+<div class="node purple">
+  <div class="node-header"><div class="node-icon purple">&#x2601;&#xFE0F;</div><div><div class="node-title">Carga de Archivos a S3</div><div class="node-role">Administrador &rarr; Upload de archivos &rarr; AWS S3</div></div></div>
+  <div class="node-body">Desde la misma plataforma se podr&aacute;n cargar y actualizar los archivos que alimentan S3: listas de precios (Excel/CSV), fichas t&eacute;cnicas (PDF), brochures, promociones del mes, certificaciones e inventario. Sin necesidad de acceder directamente a AWS.</div>
+  <div class="node-tags"><span class="tag purple">Drag &amp; Drop</span><span class="tag purple">Validaci&oacute;n autom&aacute;tica</span><span class="tag purple">Versionado</span></div>
+</div>
+</div>
+
+<!-- ======== TAB 6: FEATURES ======== -->
+<div id="tab-features" class="tab-content">
+<p style="text-align:center;color:var(--text-dim);font-size:14px;margin-bottom:12px;">Funcionalidades adicionales v&iacute;a WhatsApp, ligadas por SKU.</p>
+<div class="node teal" style="margin-bottom:32px;">
+  <div class="node-header"><div class="node-icon teal">&#x1F4AC;</div><div><div class="node-title">Centro de Recursos del Vendedor v&iacute;a WhatsApp</div><div class="node-role">Men&uacute; interactivo &rarr; Respuestas por SKU desde AWS S3</div></div></div>
+  <div class="node-body" style="margin-bottom:16px;">El vendedor env&iacute;a un SKU y solicita cualquier recurso. El agente busca en S3 y responde en WhatsApp.</div>
+  <div class="features-grid">
+    <div class="feature-card"><div class="feature-emoji">&#x1F4CB;</div><div class="feature-name">Fichas T&eacute;cnicas</div><div class="feature-desc">PDF con specs, dimensiones, materiales y certificaciones. <strong>"M&aacute;ndame la ficha de HBL-4820"</strong></div></div>
+    <div class="feature-card"><div class="feature-emoji">&#x1F3F7;&#xFE0F;</div><div class="feature-name">Promociones del Mes</div><div class="feature-desc">Descuentos, combos y vigencias. <strong>"&iquest;Qu&eacute; promociones hay?"</strong></div></div>
+    <div class="feature-card"><div class="feature-emoji">&#x1F4F0;</div><div class="feature-name">Brochures &amp; Cat&aacute;logos</div><div class="feature-desc">Material comercial PDF para compartir con clientes.</div></div>
+    <div class="feature-card"><div class="feature-emoji">&#x1F4E6;</div><div class="feature-name">Disponibilidad de Inventario</div><div class="feature-desc">Stock por CEDIS y tiempos de entrega. La respuesta incluye la <strong>fecha de &uacute;ltima actualizaci&oacute;n</strong> del dato para que el vendedor sepa qu&eacute; tan reciente es la informaci&oacute;n. <strong>"&iquest;Hay stock del HBL-7733?"</strong></div></div>
+    <div class="feature-card"><div class="feature-emoji">&#x1F4DC;</div><div class="feature-name">Historial de Cotizaciones</div><div class="feature-desc"><strong>"&iquest;Qu&eacute; le cotic&eacute; a CEMEX el mes pasado?"</strong></div></div>
+    <div class="feature-card"><div class="feature-emoji">&#x1F3D7;&#xFE0F;</div><div class="feature-name">Certificaciones &amp; Normas</div><div class="feature-desc">NOM, UL, CE para licitaciones y proyectos.</div></div>
+  </div>
+</div>
+<div class="node blue">
+  <div class="node-header"><div class="node-icon blue">&#x2601;&#xFE0F;</div><div><div class="node-title">Arquitectura en S3</div><div class="node-role">Estructura de datos sugerida</div></div></div>
+  <div class="node-body"><pre class="s3-pre">s3://hubbell-sales-data/
+├── precios/
+│   └── price_list_2026.csv          ← SKU, precio, moneda, vigencia
+├── fichas-tecnicas/
+│   └── {SKU}.pdf                    ← Una ficha por SKU
+├── brochures/
+│   └── {categoria}/{SKU}.pdf        ← Material comercial
+├── promociones/
+│   └── promo_2026_02.json           ← Promos vigentes del mes
+├── certificaciones/
+│   └── {SKU}/                       ← NOM, UL, CE por producto
+├── inventario/
+│   └── stock_snapshot.csv           ← Stock por CEDIS + fecha actualizaci&oacute;n
+└── cotizaciones/
+    └── {vendedor_id}/{cliente_id}/   ← Historial por vendedor
+        └── COT-2026-0212.pdf</pre></div>
+</div>
+</div>
+
+<!-- ======== TAB 7: PRICING ======== -->
+<div id="tab-pricing" class="tab-content">
+<p style="text-align:center;color:var(--text-dim);font-size:14px;margin-bottom:32px;">Propuesta de inversi&oacute;n para el proyecto completo.</p>
+
+<!-- PLAN 1 -->
+<div class="pricing-section">
+<div class="pricing-card">
+  <div class="pricing-card-header" style="background:linear-gradient(135deg,#1E40AF,#2563EB);color:#fff;">
+    <h3 style="color:#fff;">Plan 1 &mdash; Plataforma Gesti&oacute;n + Agente WhatsApp</h3>
+    <p style="color:rgba(255,255,255,.7);">Plataforma gestora impulsada por IA y agente inteligente WhatsApp</p>
+  </div>
+  <div class="pricing-card-body">
+    <div class="pricing-row"><span class="pr-label">Set Up</span><span class="pr-value">$67,500 MXN <span class="pr-note">pago &uacute;nico</span></span></div>
+    <div class="pricing-row"><span class="pr-label">Fee Mensual</span><span class="pr-value">$48,000 MXN</span></div>
+    <div class="pricing-row"><span class="pr-label">Fee Mensual &times; 12 meses</span><span class="pr-value">$576,000 MXN</span></div>
+    <div class="pricing-row highlight"><span class="pr-label">Total Anual</span><span class="pr-value">$643,500 MXN</span></div>
+  </div>
+</div>
+</div>
+
+<!-- PLAN 2 -->
+<div class="pricing-section">
+<div class="pricing-card">
+  <div class="pricing-card-header" style="background:linear-gradient(135deg,#7C3AED,#8B5CF6);color:#fff;">
+    <h3 style="color:#fff;">Plan 2 &mdash; Plataforma + Agente + Pricing Analytics</h3>
+    <p style="color:rgba(255,255,255,.7);">Todo incluido: plataforma gestora, agente WhatsApp y m&oacute;dulo de Pricing Analytics</p>
+  </div>
+  <div class="pricing-card-body">
+    <div class="pricing-row"><span class="pr-label">Set Up</span><span class="pr-value">$67,500 MXN <span class="pr-note">pago &uacute;nico</span></span></div>
+    <div class="pricing-row"><span class="pr-label">Fee Mensual</span><span class="pr-value">$43,200 MXN</span></div>
+    <div class="pricing-row"><span class="pr-label">Pricing Analytics Mensual</span><span class="pr-value">$11,070 MXN</span></div>
+    <div class="pricing-row"><span class="pr-label">(Fee + Analytics) &times; 12 meses</span><span class="pr-value">$651,240 MXN</span></div>
+    <div class="pricing-row highlight"><span class="pr-label">Total Anual</span><span class="pr-value">$718,740 MXN</span></div>
+  </div>
+</div>
+</div>
+
+<!-- DISCOUNT -->
+<div class="pricing-discount">
+  <h4>&#x1F389; Incentivo por Pago Anticipado (Upfront)</h4>
+  <p>Paga el total anual por adelantado y obt&eacute;n un <strong>10% de descuento</strong> sobre el monto total.</p>
+  <div class="discount-grid">
+    <div class="discount-box">
+      <div class="db-plan">Plan 1 &mdash; Plataforma + Agente</div>
+      <div class="db-original">$643,500 MXN</div>
+      <div class="db-price">$579,150 MXN</div>
+      <div class="db-savings">Ahorro: $64,350 MXN</div>
+    </div>
+    <div class="discount-box">
+      <div class="db-plan">Plan 2 &mdash; + Pricing Analytics</div>
+      <div class="db-original">$718,740 MXN</div>
+      <div class="db-price">$646,866 MXN</div>
+      <div class="db-savings">Ahorro: $71,874 MXN</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+function switchTab(tab){
+  var c=document.querySelectorAll('.tab-content');for(var i=0;i<c.length;i++)c[i].classList.remove('active');
+  var b=document.querySelectorAll('.tab');for(var i=0;i<b.length;i++)b[i].classList.remove('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  for(var i=0;i<b.length;i++){if(b[i].getAttribute('onclick').indexOf(tab)!==-1)b[i].classList.add('active');}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+var obs=new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting){en.target.style.opacity='1';en.target.style.transform='translateY(0)';}});},{threshold:.1});
+var els=document.querySelectorAll('.node,.phase-label,.connector,.fc-node,.fc-arrow,.pricing-card,.platform-card');
+for(var i=0;i<els.length;i++){els[i].style.opacity='0';els[i].style.transform='translateY(20px)';els[i].style.transition='all .5s ease';obs.observe(els[i]);}
+</script>
+</body>
+</html>
